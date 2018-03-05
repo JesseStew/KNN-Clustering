@@ -72,9 +72,9 @@ def assign_nearest_neighbors(train_data, test_data, num_k):
                     t = test_data[num].contents
                     d = itr.contents
                     u = item.contents
-                    sim_t_u = euclidean_dist(t, u)
-                    sim_t_d = euclidean_dist(t, d)
-                    if sim_t_u >= sim_t_d:
+                    dist_t_u = euclidean_dist(t, u) #
+                    dist_t_d = euclidean_dist(t, d)
+                    if dist_t_u >= dist_t_d:
                         test_data[num].nearest_neighbors.remove(item)
                         test_data[num].nearest_neighbors.append(itr)
 
@@ -100,6 +100,29 @@ def assign_class_by_nn(test_data):
             else:
                 item.weight_nn[itr.classification] = (1/euclid_dist)
         item.classification = key_with_max_val(item.weight_nn)
+        
+def choose_num_k(train_data_sample, test_data, sqrt_len_train_data):
+    num_k = 0
+    old_accuracy = 0
+    test_data = itemize_data(test_data)
+    assign_classification(test_data)
+    train_data_sample = itemize_data(train_data_sample)
+    assign_classification(train_data_sample)
+    for k in range(int(sqrt_len_train_data)):
+        k = k + 1
+        print("k: ", k, " sqrt_len_train_data: ", sqrt_len_train_data)
+        assign_nearest_neighbors(train_data_sample, test_data, k)
+        assign_class_by_nn(test_data)
+        count = 0
+        for item in test_data:
+            #print("Desired class: ", item.original_class, " Computed Class: ", item.classification)
+            if item.original_class != item.classification:
+                count = count + 1
+        accuracy = ((len(test_data)-count)/len(test_data))*100
+        if accuracy > old_accuracy:
+            old_accuracy = accuracy
+            num_k = k
+    return num_k
 
 with open('MNIST_train_sample.csv', newline='', encoding='utf_8') as f:
     reader = csv.reader(f)
@@ -112,16 +135,10 @@ with open('MNIST_train.csv', newline='', encoding='utf_8') as f:
 with open('MNIST_test.csv', newline='', encoding='utf_8') as f:
     reader = csv.reader(f)
     test_data = list(reader)
+        
+sqrt_len_train_data = math.sqrt(len(train_data))
 
-'''
-def choose_num_k(train_data_sample, test_data, sqrt_len_train_data):
-    test_data = itemize_data(test_data)
-    assign_classification(test_data)
-    train_data_sample = itemize_data(train_data_sample)
-    assign_classification(train_data_sample)
-    
-    for k in range(sqrt_len_train_data):
-'''     
+num_k = choose_num_k(train_data_sample, test_data, sqrt_len_train_data)
 
 test_data = itemize_data(test_data)
 assign_classification(test_data)
@@ -131,6 +148,7 @@ assign_classification(train_data)
 
 assign_nearest_neighbors(train_data, test_data, num_k)
 assign_class_by_nn(test_data)
+
 print("K = ", num_k)
 
 count = 0
@@ -139,7 +157,9 @@ for item in test_data:
     if item.original_class != item.classification:
         count = count + 1
 
-print("Accuracy rate:  ", (len(test_data)-count)/len(test_data))
+accuracy = ((len(test_data)-count)/len(test_data))*100
+
+print("Accuracy rate:  ", accuracy, "%")
 print("Number of misclassified test samples: ", count)
 print("Total number of test samples: ", len(test_data))
 
