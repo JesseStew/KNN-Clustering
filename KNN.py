@@ -74,7 +74,7 @@ def assign_nearest_neighbors(train_data, test_data, num_k):
                     u = item.contents
                     sim_t_u = euclidean_dist(t, u)
                     sim_t_d = euclidean_dist(t, d)
-                    if sim_t_u <= sim_t_d:
+                    if sim_t_u >= sim_t_d:
                         test_data[num].nearest_neighbors.remove(item)
                         test_data[num].nearest_neighbors.append(itr)
 
@@ -82,7 +82,7 @@ def assign_nearest_neighbors(train_data, test_data, num_k):
 # Returns key with largest value
 # Input: dictionary
 # Output: returns key with maximum value
-def keywithmaxval(d): 
+def key_with_max_val(d): 
      return max(d, key=d.get)
  
 # Assigns classification to all items in test_data
@@ -99,15 +99,29 @@ def assign_class_by_nn(test_data):
                 item.weight_nn[itr.classification] = item.weight_nn[itr.classification] + (1/euclid_dist)
             else:
                 item.weight_nn[itr.classification] = (1/euclid_dist)
-        item.classification = keywithmaxval(item.weight_nn)
-        
+        item.classification = key_with_max_val(item.weight_nn)
+
 with open('MNIST_train_sample.csv', newline='', encoding='utf_8') as f:
+    reader = csv.reader(f)
+    train_data_sample = list(reader)
+
+with open('MNIST_train.csv', newline='', encoding='utf_8') as f:
     reader = csv.reader(f)
     train_data = list(reader)
     
 with open('MNIST_test.csv', newline='', encoding='utf_8') as f:
     reader = csv.reader(f)
     test_data = list(reader)
+
+'''
+def choose_num_k(train_data_sample, test_data, sqrt_len_train_data):
+    test_data = itemize_data(test_data)
+    assign_classification(test_data)
+    train_data_sample = itemize_data(train_data_sample)
+    assign_classification(train_data_sample)
+    
+    for k in range(sqrt_len_train_data):
+'''     
 
 test_data = itemize_data(test_data)
 assign_classification(test_data)
