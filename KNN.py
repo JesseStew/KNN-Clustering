@@ -111,6 +111,7 @@ def choose_num_k(train_data_sample, test_data, sqrt_len_train_data):
     for k in range(int(sqrt_len_train_data)):
         k = k + 1
         print("k: ", k, " sqrt_len_train_data: ", sqrt_len_train_data)
+        print("old_accuracy: ", old_accuracy) #check for improvement
         assign_nearest_neighbors(train_data_sample, test_data, k)
         assign_class_by_nn(test_data)
         count = 0
