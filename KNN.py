@@ -13,21 +13,22 @@ import math
 import csv
 
 # Number of k-items to compare
-num_k = 3
+num_k = 4
 
 class Item(object):
-    def __init__(self, contents = None, nearest_neighbors = None, classification = None):
+    def __init__(self, contents = None, nearest_neighbors = None, weight_nn = None, classification = None):
         self.contents = contents
         self.nearest_neighbors = nearest_neighbors
+        self.weight_nn = weight_nn
         self.classification = classification
 
-# Takes list of lists and number assigned to k
+# Takes list of lists and number
 # returns list of Item objects
-def itemize_data(data, num_k):
+def itemize_data(data):
     item_list = []
     #create list of items
     for itr in range(1,len(data)):  #skip first tuple
-        item = Item(data[itr], num_k)
+        item = Item(data[itr])
         item_list.append(item)
     return item_list
 
@@ -74,16 +75,29 @@ def assign_nearest_neighbors(train_data, test_data, num_k):
                     if sim_t_u <= sim_t_d:
                         test_data[num].nearest_neighbors.remove(item)
                         test_data[num].nearest_neighbors.append(itr)
+def keywithmaxval(d):
+     """ a) create a list of the dict's keys and values; 
+         b) return the key with the max value"""  
+     v=list(d.values())
+     k=list(d.keys())
+     return k[v.index(max(v))]
 
+# ((1/d)*vote)(vote=number of objects in same class) 
 # Assigns classification to all items in test_data
 # Input: list of test data items
 # No output: assign item.classification internally
 def assign_class_by_nn(test_data):
     for item in test_data:
-        classification = []
+        #classification = []
+        item.weight_nn = {}
         for itr in item.nearest_neighbors:
-            classification.append(itr.classification)
-        item.classification = mode(classification)
+            euclid_dist = euclidean_dist(itr.contents, item.contents)
+            #classification.append(itr.classification)
+            if itr.classification in item.weight_nn.keys():
+                item.weight_nn[itr.classification] = item.weight_nn[itr.classification] + (1/euclid_dist)
+            else:
+                item.weight_nn[itr.classification] = (1/euclid_dist)
+        item.classification = keywithmaxval(item.weight_nn)
         
 with open('MNIST_train.csv', newline='', encoding='utf_8') as f:
     reader = csv.reader(f)
@@ -93,13 +107,13 @@ with open('MNIST_test.csv', newline='', encoding='utf_8') as f:
     reader = csv.reader(f)
     test_data = list(reader)
 
-test_data = itemize_data(test_data, num_k)
+test_data = itemize_data(test_data)
 assign_classification(test_data)
 print("test_data[0].classification: ", test_data[0].classification)
 print("test_data[1].classification: ", test_data[1].classification)
 print("test_data[len(test_data)-1].classification: ", test_data[len(test_data)-1].classification)
 
-train_data = itemize_data(train_data, num_k)
+train_data = itemize_data(train_data)
 assign_classification(train_data)
 print("\ntrain_data[0].classification: ", train_data[0].classification)
 print("train_data[1].classification: ", train_data[1].classification)
