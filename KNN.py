@@ -8,7 +8,7 @@ HW2
 
 clear = "\n" * 100
 
-from statistics import mode
+#from statistics import mode
 import math
 import csv
 
@@ -16,11 +16,12 @@ import csv
 num_k = 4
 
 class Item(object):
-    def __init__(self, contents = None, nearest_neighbors = None, weight_nn = None, classification = None):
+    def __init__(self, contents = None, nearest_neighbors = None, weight_nn = None, classification = None, original_class = None):
         self.contents = contents
         self.nearest_neighbors = nearest_neighbors
         self.weight_nn = weight_nn
         self.classification = classification
+        self.original_class = original_class
 
 # Takes list of lists and number
 # returns list of Item objects
@@ -36,7 +37,8 @@ def itemize_data(data):
 # to list of Item objects
 def assign_classification(itemized_data):
     for itr in itemized_data:
-        itr.classification = itr.contents.pop(0)
+        itr.original_class = itr.contents.pop(0)
+        itr.classification = itr.original_class
 
 # Find euclidean distance measure of two Item objects
 # Input: two lists of numbers which are the same size.
@@ -75,14 +77,16 @@ def assign_nearest_neighbors(train_data, test_data, num_k):
                     if sim_t_u <= sim_t_d:
                         test_data[num].nearest_neighbors.remove(item)
                         test_data[num].nearest_neighbors.append(itr)
-def keywithmaxval(d):
-     """ a) create a list of the dict's keys and values; 
-         b) return the key with the max value"""  
+
+# Creates a list of the dictionary's keys and values
+# Returns key with largest value
+# Input: dictionary
+# Output: returns key with maximum value
+def keywithmaxval(d): 
      v=list(d.values())
      k=list(d.keys())
      return k[v.index(max(v))]
-
-# ((1/d)*vote)(vote=number of objects in same class) 
+ 
 # Assigns classification to all items in test_data
 # Input: list of test data items
 # No output: assign item.classification internally
@@ -109,17 +113,30 @@ with open('MNIST_test.csv', newline='', encoding='utf_8') as f:
 
 test_data = itemize_data(test_data)
 assign_classification(test_data)
-print("test_data[0].classification: ", test_data[0].classification)
-print("test_data[1].classification: ", test_data[1].classification)
-print("test_data[len(test_data)-1].classification: ", test_data[len(test_data)-1].classification)
 
 train_data = itemize_data(train_data)
 assign_classification(train_data)
-print("\ntrain_data[0].classification: ", train_data[0].classification)
-print("train_data[1].classification: ", train_data[1].classification)
-print("train_data[len(train_data)-1].classification: ", train_data[len(train_data)-1].classification)
 
 assign_nearest_neighbors(train_data, test_data, num_k)
 assign_class_by_nn(test_data)
+print("K = ", num_k)
 
-            
+count = 0
+for item in test_data:
+    print("Desired class: ", item.original_class, " Computed Class: ", item.classification)
+    if item.original_class != item.classification:
+        count = count + 1
+
+print("Accuracy rate:  ", (len(test_data)-count)/len(test_data))
+print("Number of misclassified test samples: ", count)
+print("Total number of test samples: ", len(test_data))
+
+'''
+K =  4
+Desired class:  0 computed class: 0
+Desired class:  0 computed class: 0
+Accuracy rate:  86.0%
+Number of misclassified test samples:  7
+Total number of test samples: 50
+
+'''
