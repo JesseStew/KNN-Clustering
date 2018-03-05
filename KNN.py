@@ -83,9 +83,7 @@ def assign_nearest_neighbors(train_data, test_data, num_k):
 # Input: dictionary
 # Output: returns key with maximum value
 def keywithmaxval(d): 
-     v=list(d.values())
-     k=list(d.keys())
-     return k[v.index(max(v))]
+     return max(d, key=d.get)
  
 # Assigns classification to all items in test_data
 # Input: list of test data items
@@ -103,7 +101,7 @@ def assign_class_by_nn(test_data):
                 item.weight_nn[itr.classification] = (1/euclid_dist)
         item.classification = keywithmaxval(item.weight_nn)
         
-with open('MNIST_train.csv', newline='', encoding='utf_8') as f:
+with open('MNIST_train_sample.csv', newline='', encoding='utf_8') as f:
     reader = csv.reader(f)
     train_data = list(reader)
     
