@@ -11,9 +11,11 @@ clear = "\n" * 100
 #from statistics import mode
 import math
 import csv
+'''Used for choosing num_k'''
+#import random
 
 # Number of k-items to compare
-num_k = 4
+num_k = 3
 
 class Item(object):
     def __init__(self, contents = None, nearest_neighbors = None, weight_nn = None, classification = None, original_class = None):
@@ -100,7 +102,9 @@ def assign_class_by_nn(test_data):
             else:
                 item.weight_nn[itr.classification] = (1/euclid_dist)
         item.classification = key_with_max_val(item.weight_nn)
-        
+
+# Used to determine num_k
+'''
 def choose_num_k(train_data_sample, test_data, sqrt_len_train_data):
     num_k = 0
     old_accuracy = 0
@@ -124,11 +128,7 @@ def choose_num_k(train_data_sample, test_data, sqrt_len_train_data):
             old_accuracy = accuracy
             num_k = k
     return num_k
-
-with open('MNIST_train_sample.csv', newline='', encoding='utf_8') as f:
-    reader = csv.reader(f)
-    train_data_sample = list(reader)
-
+'''
 with open('MNIST_train.csv', newline='', encoding='utf_8') as f:
     reader = csv.reader(f)
     train_data = list(reader)
@@ -139,7 +139,9 @@ with open('MNIST_test.csv', newline='', encoding='utf_8') as f:
         
 sqrt_len_train_data = math.sqrt(len(train_data))
 
-num_k = choose_num_k(train_data_sample, test_data, sqrt_len_train_data)
+'''Used in choosing num_k'''
+#train_data_sample = random.sample(train_data, 200)
+#num_k = choose_num_k(train_data_sample, test_data, sqrt_len_train_data)
 
 test_data = itemize_data(test_data)
 assign_classification(test_data)
